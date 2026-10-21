@@ -14,7 +14,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const active=()=>{const t=themes.find(t=>t.id===theme);return t?t.words:[]};
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(saved));}catch{}}
 function speaker(s){if(!("speechSynthesis" in window)){alert("此浏览器不支持语音朗读。");return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s);u.lang="en-US";u.rate=.84;speechSynthesis.speak(u);}
-function randomList(){return [...active()].sort(()=>Math.random()-.5);}
+function randomList(){const list=active().map(w=>({...w,theme}));for(let i=list.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[list[i],list[j]]=[list[j],list[i]];}return list;}
 function choose(id){theme=id;index=0;answered=false;revealed=false;currentList=[];render();}
 function selector(){return '<label for="theme">选择主题：</label><select id="theme">'+themes.map(t=>'<option value="'+t.id+'" '+(t.id===theme?"selected":"")+'>'+esc(t.emoji+" "+t.nameZh+" · "+t.name)+"</option>").join("")+'</select>';}
 function box(title,body){return '<div class="eyebrow">WORDSPRING · A2–B1</div><h1>'+title+'</h1><p class="lead">'+body+'</p>'+selector();}
