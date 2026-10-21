@@ -17,9 +17,13 @@ WordSpring is a bilingual, interactive English-learning web app designed for **C
 | Themes | Everyday Life, School & Campus, Work & Communication, Travel |
 | Vocabulary | Useful English words, Chinese definitions, example sentences, and audio pronunciation |
 
+## Vocabulary bank: 200 words
+
+Five themes, with 40 entries in each: **Daily Life**, **School & Education**, **Work & Communication**, **Travel & Transportation**, and **Emotions & Social Life**. Each entry has an English word, simplified-Chinese meaning, and English usage example. The same theme vocabulary powers flashcards, spelling, and dictation. The total is 200 themed entries; several high-utility English words appear in more than one topic by design.
+
 ## Working features (first version)
 
-- **Lessons:** Four themed word lists, with Chinese translations and contextual English examples.
+- **Lessons:** Five themed word lists, with Chinese translations and contextual English examples.
 - **Vocabulary Flashcards:** Flip a card to see the meaning; mark it as learned or review again.
 - **Spelling Challenge:** See the Chinese meaning, then type the English word. Exact spelling is checked locally (case and outside whitespace ignored).
 - **Dictation:** Listen to a word spoken by the browser and type what you hear. The answer is checked locally.
@@ -50,7 +54,8 @@ GEAP-103/
     README.md         # Project description and team plan
     index.html        # Web page and navigation
     styles.css        # Responsive styling
-    app.js            # Vocabulary data, games, progress and scoring
+    vocabulary.js     # 200 bilingual vocabulary entries in five themes
+    app.js            # Games, progress and deterministic scoring
     AI_INTEGRATION.md # Safe API integration plan for a future release
 ```
 
