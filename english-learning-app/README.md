@@ -111,3 +111,9 @@ node english-learning-app/tests/browser.cjs
 ```
 
 Override `WORDSPRING_URL` if using a different server address. The check covers vocabulary completeness, all categories, Chinese/English switching, spelling and dictation feedback, all grammar explanations, saved-progress compatibility, language persistence, and a 375-pixel mobile layout. Browser voice availability remains device-dependent.
+
+## Word classes and logo
+
+Every themed entry now includes a `pos` label for the sense shown in its Chinese meaning and English example: **n.** (noun), **v.** (verb), **adj.** (adjective), or **n. phr.** (noun phrase). Labels appear after the English word on both sides of flashcards, in answer feedback, and in mistake review; spelling prompts also show the word class. Labels describe the current learning sense rather than every possible dictionary use. Switching UI language translates the label explanations. English pronunciation and scoring still use only the word itself.
+
+The header uses the user-provided WordSpring image at `assets/wordspring-logo.jpg`, preserved with its original aspect ratio and accessible alternative text.

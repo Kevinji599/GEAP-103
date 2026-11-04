@@ -38,6 +38,18 @@ const assert = require("node:assert/strict");
     assert.equal(data.flatMap((t) => t.words).length, 405);
     for (const t of data)
       for (const w of t.words) assert.ok(w.word && w.zh && w.example);
+    const allowedPos = new Set(["n.", "v.", "adj.", "n. phr."]);
+    for (const t of data)
+      for (const w of t.words)
+        assert.ok(
+          allowedPos.has(w.pos),
+          t.id + ":" + w.word + " is missing a valid POS",
+        );
+    const logo = page.locator(".brand-logo");
+    assert.equal(await logo.getAttribute("alt"), "WordSpring");
+    assert.ok(
+      await logo.evaluate((img) => img.complete && img.naturalWidth === 1280),
+    );
     const before = JSON.parse(
       await page.evaluate(() => localStorage.getItem("wordspring-progress-v1")),
     );
@@ -58,7 +70,13 @@ const assert = require("node:assert/strict");
     for (const t of data) {
       await page.click('[data-page="cards"]');
       await page.selectOption("#theme", t.id);
+      assert.ok(
+        (await page.locator("#flip .pos").innerText()).includes(t.words[0].pos),
+      );
       await page.click("#flip");
+      assert.ok(
+        (await page.locator("#flip .pos").innerText()).includes(t.words[0].pos),
+      );
       assert.match(
         await page.locator("#flip").innerText(),
         new RegExp(t.words[0].word),
@@ -67,6 +85,10 @@ const assert = require("node:assert/strict");
         (await page.locator("#flip").innerText()).includes(t.words[0].zh),
       );
       await page.selectOption("#language", "zh");
+      assert.match(
+        await page.locator("#flip .pos").innerText(),
+        /名词|动词|形容词/,
+      );
       assert.equal(await page.locator("#theme").inputValue(), t.id);
       await page.selectOption("#language", "en");
     }
@@ -85,15 +107,36 @@ const assert = require("node:assert/strict");
       await page.fill("#guess", answer.toUpperCase());
       await page.locator("#answer button").click();
       assert.match(await page.locator("#feedback").innerText(), /Correct/);
+      assert.equal(await page.locator("#feedback .pos").count(), 1);
       const attempts = await page.evaluate(() => saved.attempts);
       await page.selectOption("#language", "zh");
       assert.match(await page.locator("#feedback").innerText(), /正确/);
+      assert.match(
+        await page.locator("#feedback .pos").innerText(),
+        /名词|动词|形容词/,
+      );
       assert.ok(await page.locator("#answer button").isDisabled());
       assert.equal(await page.evaluate(() => saved.attempts), attempts);
       await page.click("#next");
       assert.equal(await page.locator("#feedback").innerText(), "");
       await page.selectOption("#language", "en");
     }
+    // Verify all authored entries render their labels without changing IDs or progress.
+    for (const t of data) {
+      await page.click('[data-page="cards"]');
+      await page.selectOption("#theme", t.id);
+      for (const w of t.words) {
+        const label = await page.locator("#flip").innerText();
+        assert.ok(label.includes(w.word) && label.includes(w.pos));
+        await page.click("#next");
+      }
+    }
+    await page.click('[data-page="spelling"]');
+    await page.fill("#guess", "intentionally-wrong");
+    await page.locator("#answer button").click();
+    assert.equal(await page.locator("#feedback .pos").count(), 1);
+    await page.click('[data-page="progress"]');
+    assert.ok((await page.locator(".pill .pos").count()) > 0);
     await page.click('[data-page="grammar"]');
     for (let i = 0; i < 12; i++) {
       await page.click('[data-option="1"]');
@@ -134,7 +177,7 @@ const assert = require("node:assert/strict");
     });
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: vocabulary, all categories, bilingual UI/feedback, saved progress, language persistence, mobile layout, and no browser errors.",
+      "PASS: 405 POS labels, bilingual cards and feedback, logo, vocabulary, saved progress, all activities, mobile layout, and no browser errors.",
     );
   } finally {
     await browser.close();

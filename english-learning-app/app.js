@@ -258,6 +258,60 @@ function home() {
     categoryTiles()
   );
 }
+const partsOfSpeech = {
+  "n.": ["名词", "Noun"],
+  "v.": ["动词", "Verb"],
+  "adj.": ["形容词", "Adjective"],
+  "n. phr.": ["名词短语", "Noun phrase"],
+};
+function posBadge(w) {
+  return (
+    '<span class="pos">' +
+    esc(w.pos) +
+    " " +
+    esc(tr(...partsOfSpeech[w.pos])) +
+    "</span>"
+  );
+}
+function wordWithPos(w) {
+  return esc(w.word) + posBadge(w);
+}
+function posNote() {
+  return (
+    '<p class="muted pos-note">' +
+    tr(
+      "词性按当前释义与例句标注：n. 名词 · v. 动词 · adj. 形容词 · n. phr. 名词短语。",
+      "Parts of speech match the meaning and example shown: n. noun · v. verb · adj. adjective · n. phr. noun phrase.",
+    ) +
+    "</p>"
+  );
+}
+function renderFeedback() {
+  if (!lastFeedback || !$("#feedback")) return;
+  const f = lastFeedback;
+  const correctAnswer = f.kind === "word" ? f.w.word : f.q[1][f.q[2]];
+  const details =
+    f.kind === "word"
+      ? "<p>" +
+        wordWithPos(f.w) +
+        '</p><p class="muted">' +
+        esc(f.w.zh) +
+        " · " +
+        esc(f.w.example) +
+        "</p>"
+      : '<p class="muted">' +
+        esc(tr(f.q[3], grammarEnglish[currentQuiz % questions.length])) +
+        "</p>";
+  $("#feedback").innerHTML =
+    '<p class="' +
+    (f.right ? "good" : "bad") +
+    '">' +
+    (f.right
+      ? tr("✓ 正确！", "✓ Correct!")
+      : tr("✗ 正确答案：", "✗ Correct answer: ") + esc(correctAnswer)) +
+    "</p>" +
+    details;
+}
 function cards() {
   const ws = active();
   if (!ws.length) return "No words.";
@@ -271,6 +325,7 @@ function cards() {
         "Flip a card for its Chinese meaning and example. Mark it as learned or review it later.",
       ),
     ) +
+    posNote() +
     '<div class="panel"><div class="muted">' +
     (index + 1) +
     " / " +
@@ -282,14 +337,14 @@ function cards() {
       ? '<span class="muted">' +
         esc(w.zh) +
         "</span><strong>" +
-        esc(w.word) +
+        wordWithPos(w) +
         "</strong><span>" +
         esc(w.example) +
         "</span>"
       : '<span class="muted">' +
         tr("点击翻卡", "TAP TO FLIP") +
         "</span><strong>" +
-        esc(w.word) +
+        wordWithPos(w) +
         '</strong><span class="muted">' +
         tr("点击查看释义与例句", "Tap for meaning and example") +
         "</span>") +
@@ -321,6 +376,7 @@ function game(kind) {
             "Read the Chinese meaning and spell the English word.",
           ),
     ) +
+    posNote() +
     '<div class="panel"><div class="muted">' +
     tr("题目", "Question") +
     " " +
@@ -328,7 +384,9 @@ function game(kind) {
     " / " +
     currentList.length +
     "</div><h2>" +
-    (dict ? "" + tr("🎧 听一听", "\ud83c\udfa7 Listen") + "" : esc(w.zh)) +
+    (dict
+      ? "" + tr("🎧 听一听", "\ud83c\udfa7 Listen") + ""
+      : esc(w.zh) + posBadge(w)) +
     "</h2>" +
     (dict
       ? '<button id="speak">' +
@@ -508,7 +566,7 @@ function progress() {
           .map(
             (w) =>
               '<span class="pill">' +
-              esc(w.word) +
+              wordWithPos(w) +
               " · " +
               esc(w.zh) +
               "</span>",
@@ -598,18 +656,7 @@ function render() {
       answered = true;
       lastFeedback = { kind: "word", right, w, guess };
       tally(right, w);
-      $("#feedback").innerHTML =
-        '<p class="' +
-        (right ? "good" : "bad") +
-        '">' +
-        (right
-          ? "" + tr("✓ 回答正确！", "\u2713 Correct!") + ""
-          : tr("✗ 正确答案：", "\u2717 Correct answer: ") + esc(w.word)) +
-        '</p><p class="muted">' +
-        esc(w.zh) +
-        " · " +
-        esc(w.example) +
-        "</p>";
+      renderFeedback();
       $("#guess").disabled = true;
       $("#answer button").disabled = true;
     };
@@ -624,20 +671,7 @@ function render() {
         saved.attempts++;
         if (right) saved.correct++;
         persist();
-        $("#feedback").innerHTML =
-          '<p class="' +
-          (right ? "good" : "bad") +
-          '">' +
-          (right
-            ? tr("✓ 正确！", "\u2713 Correct!")
-            : tr("✗ 正确答案：", "\u2717 Correct answer: ") + esc(q[1][q[2]])) +
-          '</p><p class="muted">' +
-          esc(
-            language === "zh"
-              ? q[3]
-              : grammarEnglish[currentQuiz % questions.length],
-          ) +
-          "</p>";
+        renderFeedback();
         document
           .querySelectorAll(".option")
           .forEach((x) => (x.disabled = true));
@@ -682,22 +716,5 @@ document.querySelector("#language").addEventListener("change", (e) => {
   render();
   if (guess !== undefined && document.querySelector("#guess"))
     document.querySelector("#guess").value = guess;
-  if (lastFeedback && document.querySelector("#feedback")) {
-    const f = lastFeedback;
-    document.querySelector("#feedback").innerHTML =
-      '<p class="' +
-      (f.right ? "good" : "bad") +
-      '">' +
-      (f.right
-        ? tr("✓ 正确！", "✓ Correct!")
-        : tr("✗ 正确答案：", "✗ Correct answer: ") +
-          esc(f.kind === "word" ? f.w.word : f.q[1][f.q[2]])) +
-      '</p><p class="muted">' +
-      esc(
-        f.kind === "word"
-          ? f.w.zh + " · " + f.w.example
-          : tr(f.q[3], grammarEnglish[currentQuiz % questions.length]),
-      ) +
-      "</p>";
-  }
+  renderFeedback();
 });

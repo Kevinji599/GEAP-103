@@ -293,3 +293,31 @@ button:disabled {
 .card strong {
   overflow-wrap: anywhere;
 }
+
+.brand-logo {
+  display: block;
+  width: 176px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: #fff;
+}
+.pos {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.18em 0.55em;
+  border-radius: 6px;
+  background: #e2eee7;
+  color: #305d50;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  vertical-align: middle;
+  letter-spacing: 0;
+}
+.pos-note {
+  max-width: 620px;
+}
+.card strong {
+  font-size: clamp(24px, 5vw, 36px);
+}
