@@ -432,3 +432,28 @@ button:disabled {
     transition: none;
   }
 }
+
+.card-controls {
+  align-items: flex-start;
+}
+.pronunciation-actions {
+  display: grid;
+  gap: 8px;
+}
+.pronunciation-link {
+  display: block;
+  padding: 12px 17px;
+  border-radius: 11px;
+  background: #e7eee8;
+  color: #235347;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+}
+.pronunciation-link:hover {
+  background: #cce2d1;
+}
+.pronunciation-link:focus-visible {
+  outline: 3px solid #ebba61;
+  outline-offset: 2px;
+}

@@ -313,6 +313,13 @@ function renderFeedback() {
     "</p>" +
     details;
 }
+function cambridgePronunciationUrl(word) {
+  const slug = word.trim().toLowerCase().replace(/\s+/g, "-");
+  return (
+    "https://dictionary.cambridge.org/pronunciation/english/" +
+    encodeURIComponent(slug)
+  );
+}
 function cards() {
   const ws = active();
   if (!ws.length) return "No words.";
@@ -355,9 +362,20 @@ function cards() {
     "</strong><span>" +
     esc(w.example) +
     "</span></span></span>" +
-    '</button><div class="controls"><button id="speak">' +
-    tr("🔊 发音", "\ud83d\udd0a Pronounce") +
-    '</button><button id="review">' +
+    '</button><div class="controls card-controls"><div class="pronunciation-actions"><button id="speak">' +
+    tr("发音📢", "Pronounce 📢") +
+    '</button><a id="cambridge-pronunciation" class="pronunciation-link" href="' +
+    esc(cambridgePronunciationUrl(w.word)) +
+    '" target="_blank" rel="noopener noreferrer" aria-label="' +
+    esc(
+      tr(
+        "在新标签页打开 " + w.word + " 的剑桥发音",
+        "Open Cambridge pronunciation for " + w.word + " in a new tab",
+      ),
+    ) +
+    '">' +
+    tr("剑桥发音📢", "Cambridge 📢") +
+    '</a></div><button id="review">' +
     tr("稍后复习", "Review later") +
     '</button><button id="master">✓ ' +
     tr("已掌握", "Learned entries") +

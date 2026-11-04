@@ -127,3 +127,7 @@ The Progress page shows a practice score weighted by spelling (35%), dictation (
 A rough practice band appears after 20 distinct spelling items, 20 dictation items, 8 grammar questions, and 3 vocabulary categories. The weakest skill determines the band: below 45% building A1 foundations, 45% developing A2, 70% consolidating A2, and 85% approaching the B1 practice target. These are transparent, authored heuristics, not validated CEFR cut scores. This small vocabulary and basic grammar bank cannot assess full language proficiency, natural listening, speaking, or writing. Clearing progress also clears the rating evidence.
 
 Additional browser checks: `node english-learning-app/tests/enhancements.cjs`.
+
+## Cambridge pronunciation link
+
+On flashcards, **剑桥发音📢 / Cambridge 📢** appears immediately below the browser pronunciation button. It opens the current word's Cambridge English pronunciation page in a new tab. The link follows the active word and category, including hyphenated multiword terms. This is an external dictionary link; the app does not download or embed Cambridge audio. Availability of individual entries is controlled by Cambridge.
