@@ -154,6 +154,7 @@ function wordId(w) {
   return w.theme + ":" + w.word;
 }
 function tally(correct, w) {
+  recordSkill(currentPage, wordId(w), correct);
   saved.attempts++;
   if (correct) {
     saved.correct++;
@@ -330,24 +331,30 @@ function cards() {
     (index + 1) +
     " / " +
     ws.length +
-    '</div><button class="card" id="flip" aria-label="' +
+    '</div><button class="card' +
+    (revealed ? " is-flipped" : "") +
+    '" id="flip" aria-pressed="' +
+    revealed +
+    '" aria-label="' +
     tr("翻转词汇卡片", "Flip vocabulary card") +
     '">' +
-    (revealed
-      ? '<span class="muted">' +
-        esc(w.zh) +
-        "</span><strong>" +
-        wordWithPos(w) +
-        "</strong><span>" +
-        esc(w.example) +
-        "</span>"
-      : '<span class="muted">' +
-        tr("点击翻卡", "TAP TO FLIP") +
-        "</span><strong>" +
-        wordWithPos(w) +
-        '</strong><span class="muted">' +
-        tr("点击查看释义与例句", "Tap for meaning and example") +
-        "</span>") +
+    '<span class="card-inner"><span class="card-face card-front" aria-hidden="' +
+    revealed +
+    '"><span class="muted">' +
+    tr("点击翻卡", "TAP TO FLIP") +
+    "</span><strong>" +
+    wordWithPos(w) +
+    '</strong><span class="muted">' +
+    tr("点击查看释义与例句", "Tap for meaning and example") +
+    '</span></span><span class="card-face card-back" aria-hidden="' +
+    !revealed +
+    '"><span class="muted">' +
+    esc(w.zh) +
+    "</span><strong>" +
+    wordWithPos(w) +
+    "</strong><span>" +
+    esc(w.example) +
+    "</span></span></span>" +
     '</button><div class="controls"><button id="speak">' +
     tr("🔊 发音", "\ud83d\udd0a Pronounce") +
     '</button><button id="review">' +
@@ -525,6 +532,143 @@ function grammar() {
     "</button></div>"
   );
 }
+// Only recorded answers count toward the estimate; self-marked flashcards do not.
+function recordSkill(mode, id, correct) {
+  if (
+    !saved.assessment ||
+    typeof saved.assessment !== "object" ||
+    Array.isArray(saved.assessment)
+  )
+    saved.assessment = {};
+  if (
+    !saved.assessment[mode] ||
+    typeof saved.assessment[mode] !== "object" ||
+    Array.isArray(saved.assessment[mode])
+  )
+    saved.assessment[mode] = {};
+  saved.assessment[mode][id] = correct;
+}
+function assessmentSummary() {
+  const validWords = new Set(words.map(wordId));
+  const records = (mode) =>
+    Object.entries(saved.assessment?.[mode] || {}).filter(
+      ([id, value]) =>
+        typeof value === "boolean" &&
+        (mode === "grammar"
+          ? /^(?:[0-9]|1[01])$/.test(id)
+          : validWords.has(id)),
+    );
+  const spelling = records("spelling"),
+    dictation = records("dictation"),
+    grammar = records("grammar");
+  const rate = (entries) =>
+    entries.length
+      ? entries.filter(([, correct]) => correct).length / entries.length
+      : null;
+  const sp = rate(spelling),
+    di = rate(dictation),
+    gr = rate(grammar);
+  const categories = new Set(
+    [...spelling, ...dictation].map(([id]) => id.split(":")[0]),
+  ).size;
+  const weight =
+    (sp === null ? 0 : 0.35) +
+    (di === null ? 0 : 0.35) +
+    (gr === null ? 0 : 0.3);
+  const score = weight
+    ? Math.round(
+        (((sp || 0) * 0.35 + (di || 0) * 0.35 + (gr || 0) * 0.3) / weight) *
+          100,
+      )
+    : null;
+  const ready =
+    spelling.length >= 20 &&
+    dictation.length >= 20 &&
+    grammar.length >= 8 &&
+    categories >= 3;
+  // A small, authored A2–B1 practice bank cannot establish full CEFR proficiency.
+  const balanced = ready ? Math.min(sp, di, gr) * 100 : null;
+  const level = !ready
+    ? tr("资料不足，暂不估计", "More evidence needed")
+    : balanced >= 85
+      ? tr("接近 B1 练习目标", "Approaching B1 practice target")
+      : balanced >= 70
+        ? tr("A2 巩固阶段", "Consolidating A2")
+        : balanced >= 45
+          ? tr("A2 学习阶段", "Developing A2")
+          : tr("A1 基础巩固阶段", "Building A1 foundations");
+  return {
+    spelling,
+    dictation,
+    grammar,
+    sp,
+    di,
+    gr,
+    categories,
+    score,
+    ready,
+    level,
+  };
+}
+function assessmentPanel() {
+  const a = assessmentSummary();
+  const skill = (title, entries, rate) =>
+    '<div class="skill-score"><strong>' +
+    title +
+    "</strong><span>" +
+    (rate === null ? "—" : Math.round(rate * 100) + "%") +
+    "</span><small>" +
+    entries.length +
+    tr(" 道不同题目", " distinct items") +
+    "</small></div>";
+  return (
+    '<section class="panel assessment" aria-labelledby="assessment-title"><div class="eyebrow">' +
+    tr("练习表现", "PRACTICE PERFORMANCE") +
+    '</div><h2 id="assessment-title">' +
+    tr("学习评分与参考水平", "Score & estimated level") +
+    '</h2><div class="score-number">' +
+    (a.score === null ? "—" : a.score) +
+    '<small> / 100</small></div><p class="level-estimate">' +
+    tr("参考水平：", "Estimated level: ") +
+    a.level +
+    '</p><p class="muted">' +
+    tr(
+      "仅供本应用练习参考，非正式英语等级测评。",
+      "Practice indicator for this app, not a formal English proficiency assessment.",
+    ) +
+    '</p><div class="skill-scores">' +
+    skill(tr("拼写", "Spelling"), a.spelling, a.sp) +
+    skill(tr("听写", "Dictation"), a.dictation, a.di) +
+    skill(tr("语法", "Grammar"), a.grammar, a.gr) +
+    "</div><p>" +
+    tr("覆盖分类：", "Categories covered: ") +
+    a.categories +
+    " / " +
+    themes.length +
+    "</p>" +
+    (!a.ready
+      ? '<p class="assessment-guidance">' +
+        tr(
+          "完成至少 20 道不同拼写题、20 道不同听写题、8 道不同语法题，词汇覆盖至少 3 个分类后显示参考水平。",
+          "Complete at least 20 distinct spelling items, 20 dictation items and 8 grammar items across at least 3 vocabulary categories to see an estimate.",
+        ) +
+        "</p>"
+      : "") +
+    "<details><summary>" +
+    tr("评分依据与范围", "How this estimate works") +
+    "</summary><p>" +
+    tr(
+      "评分按拼写 35%、听写 35%、语法 30% 加权；未练习的项目暂不计入。每道题只采用最近一次答案，重复同题不会增加覆盖量。参考阶段取三项中较弱的一项：85% 起接近 B1 练习目标，70% 起 A2 巩固，45% 起 A2 学习，其余为 A1 基础巩固。",
+      "Score weights: spelling 35%, dictation 35%, grammar 30%; unpractised skills are temporarily excluded. Only the latest answer to each distinct item counts. The weakest skill sets the practice band: 85%+ approaching B1, 70%+ consolidating A2, 45%+ developing A2, otherwise building A1 foundations.",
+    ) +
+    "</p><p>" +
+    tr(
+      "这是本应用词汇和基础语法的粗略练习参考，并非正式 CEFR 测评，无法衡量完整阅读、自然听力、口语和写作能力。旧版总答题次数及手动标记掌握不计入水平估计。",
+      "This is a rough indicator of performance on this app’s vocabulary and basic grammar, not a validated CEFR assessment. Full reading, natural listening, speaking and writing are not assessed. Historical aggregate attempts and self-marked flashcards are excluded.",
+    ) +
+    "</p></details></section>"
+  );
+}
 function progress() {
   const pct = Math.round((saved.mastered.length / words.length) * 100),
     wrong = words.filter((w) => saved.wrong.includes(wordId(w)));
@@ -545,7 +689,9 @@ function progress() {
     tr("答题正确率", "Answer accuracy") +
     "</small><strong>" +
     (saved.attempts ? Math.round((saved.correct / saved.attempts) * 100) : 0) +
-    '%</strong></div></div><div class="panel"><h2>' +
+    "%</strong></div></div>" +
+    assessmentPanel() +
+    '<div class="panel"><h2>' +
     tr("词汇掌握进度 ", "Vocabulary progress ") +
     "" +
     pct +
@@ -610,7 +756,15 @@ function render() {
   if ($("#flip"))
     $("#flip").onclick = () => {
       revealed = !revealed;
-      render();
+      const card = $("#flip");
+      card.classList.toggle("is-flipped", revealed);
+      card.setAttribute("aria-pressed", String(revealed));
+      card
+        .querySelector(".card-front")
+        .setAttribute("aria-hidden", String(revealed));
+      card
+        .querySelector(".card-back")
+        .setAttribute("aria-hidden", String(!revealed));
     };
   if ($("#speak"))
     $("#speak").onclick = () =>
@@ -668,6 +822,7 @@ function render() {
         const q = questions[currentQuiz % questions.length],
           right = Number(b.dataset.option) === q[2];
         lastFeedback = { kind: "grammar", right, q };
+        recordSkill("grammar", String(currentQuiz % questions.length), right);
         saved.attempts++;
         if (right) saved.correct++;
         persist();

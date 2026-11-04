@@ -116,4 +116,14 @@ Override `WORDSPRING_URL` if using a different server address. The check covers 
 
 Every themed entry now includes a `pos` label for the sense shown in its Chinese meaning and English example: **n.** (noun), **v.** (verb), **adj.** (adjective), or **n. phr.** (noun phrase). Labels appear after the English word on both sides of flashcards, in answer feedback, and in mistake review; spelling prompts also show the word class. Labels describe the current learning sense rather than every possible dictionary use. Switching UI language translates the label explanations. English pronunciation and scoring still use only the word itself.
 
-The header uses the user-provided WordSpring image at `assets/wordspring-logo.jpg`, preserved with its original aspect ratio and accessible alternative text.
+The header uses the user-provided WordSpring image at `assets/wordspring-logo.png`, preserved with its original aspect ratio and accessible alternative text.
+
+## Animated cards and practice rating
+
+Flashcards rotate in both directions and honour the device's reduced-motion preference. The header now uses a transparent PNG cutout of the supplied logo.
+
+The Progress page shows a practice score weighted by spelling (35%), dictation (35%), and grammar (30%). Until all three skills are sampled, the score is normalized over sampled skills. Each distinct item's most recent answer is used, so repeating the same question does not inflate coverage. Old aggregate statistics and self-marked flashcards remain available but do not count as assessment evidence.
+
+A rough practice band appears after 20 distinct spelling items, 20 dictation items, 8 grammar questions, and 3 vocabulary categories. The weakest skill determines the band: below 45% building A1 foundations, 45% developing A2, 70% consolidating A2, and 85% approaching the B1 practice target. These are transparent, authored heuristics, not validated CEFR cut scores. This small vocabulary and basic grammar bank cannot assess full language proficiency, natural listening, speaking, or writing. Clearing progress also clears the rating evidence.
+
+Additional browser checks: `node english-learning-app/tests/enhancements.cjs`.

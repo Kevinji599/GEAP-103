@@ -48,7 +48,7 @@ const assert = require("node:assert/strict");
     const logo = page.locator(".brand-logo");
     assert.equal(await logo.getAttribute("alt"), "WordSpring");
     assert.ok(
-      await logo.evaluate((img) => img.complete && img.naturalWidth === 1280),
+      await logo.evaluate((img) => img.complete && img.naturalWidth === 1754),
     );
     const before = JSON.parse(
       await page.evaluate(() => localStorage.getItem("wordspring-progress-v1")),
@@ -71,11 +71,15 @@ const assert = require("node:assert/strict");
       await page.click('[data-page="cards"]');
       await page.selectOption("#theme", t.id);
       assert.ok(
-        (await page.locator("#flip .pos").innerText()).includes(t.words[0].pos),
+        (
+          await page.locator('#flip [aria-hidden="false"] .pos').innerText()
+        ).includes(t.words[0].pos),
       );
       await page.click("#flip");
       assert.ok(
-        (await page.locator("#flip .pos").innerText()).includes(t.words[0].pos),
+        (
+          await page.locator('#flip [aria-hidden="false"] .pos').innerText()
+        ).includes(t.words[0].pos),
       );
       assert.match(
         await page.locator("#flip").innerText(),
@@ -86,7 +90,7 @@ const assert = require("node:assert/strict");
       );
       await page.selectOption("#language", "zh");
       assert.match(
-        await page.locator("#flip .pos").innerText(),
+        await page.locator('#flip [aria-hidden="false"] .pos').innerText(),
         /名词|动词|形容词/,
       );
       assert.equal(await page.locator("#theme").inputValue(), t.id);
