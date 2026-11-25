@@ -32,6 +32,7 @@ function updateChrome() {
     dictation: ["单词听写", "Dictation"],
     grammar: ["语法测验", "Grammar"],
     progress: ["学习进度", "Progress"],
+    reading: ["阅读复习", "Reading review"],
   };
   document
     .querySelectorAll("nav button")
@@ -114,6 +115,8 @@ function randomList() {
 function choose(id) {
   lastFeedback = null;
   theme = id;
+  cardGroupNumber = 0;
+  unlockedNotice = null;
   index = 0;
   answered = false;
   revealed = false;
@@ -154,6 +157,8 @@ function wordId(w) {
   return w.theme + ":" + w.word;
 }
 function tally(correct, w) {
+  const group = readingByWord.get(wordId(w));
+  const wasUnlocked = readingUnlocked(group);
   recordSkill(currentPage, wordId(w), correct);
   saved.attempts++;
   if (correct) {
@@ -162,7 +167,9 @@ function tally(correct, w) {
   } else {
     saved.wrong = unique([...saved.wrong, wordId(w)]);
   }
+  const newlyUnlocked = checkReadingUnlock(group, wasUnlocked);
   persist();
+  return newlyUnlocked;
 }
 function categoryTiles() {
   return (
@@ -196,8 +203,8 @@ function home() {
     ) +
     '</h1><p class="lead">' +
     tr(
-      "为中文学习者设计的英语学习 App。400 个不同词汇，9 个实用分类，重点加入医疗与工业用语。练习、听写、复习，不用注册。",
-      "Practical English for Chinese-speaking learners. 400 distinct words across 9 categories, including healthcare and industry. Practice without an account.",
+      "为中文学习者设计的英语学习 App。435 个不同词汇，9 个实用分类，重点加入医疗与工业用语。练习、听写、复习，不用注册。",
+      "Practical English for Chinese-speaking learners. 435 distinct words across 9 categories, including healthcare and industry. Practice without an account.",
     ) +
     '</p><button class="btn" data-go="cards">' +
     tr("开始学习 →", "Start learning \u2192") +
@@ -321,7 +328,7 @@ function cambridgePronunciationUrl(word) {
   );
 }
 function cards() {
-  const ws = active();
+  const ws = cardGroup().words;
   if (!ws.length) return "No words.";
   index %= ws.length;
   const w = ws[index];
@@ -334,6 +341,7 @@ function cards() {
       ),
     ) +
     posNote() +
+    cardGroupControls() +
     '<div class="panel"><div class="muted">' +
     (index + 1) +
     " / " +
@@ -378,7 +386,9 @@ function cards() {
     '</a></div><button id="review">' +
     tr("稍后复习", "Review later") +
     '</button><button id="master">✓ ' +
-    tr("已掌握", "Learned entries") +
+    tr("已掌握", "Mark as learned") +
+    '</button><button id="skip">' +
+    tr("跳过", "Skip") +
     '</button><button id="next">' +
     tr("下一张 →", "Next card \u2192") +
     "</button></div></div>"
@@ -746,7 +756,8 @@ function progress() {
 }
 function next() {
   lastFeedback = null;
-  index = (index + 1) % active().length;
+  const count = currentPage === "cards" ? cardGroup().words.length : active().length;
+  index = (index + 1) % count;
   answered = false;
   revealed = false;
   render();
@@ -762,8 +773,10 @@ function render() {
       dictation: () => game("dictation"),
       grammar,
       progress,
+      reading,
     }[currentPage] || home
-  )();
+  )() + '<div id="reading-notice"></div>';
+  bindReading();
   document
     .querySelectorAll("nav button")
     .forEach((b) =>
@@ -771,6 +784,15 @@ function render() {
     );
   if ($("#theme"))
     $("#theme").addEventListener("change", (e) => choose(e.target.value));
+  if ($("#card-group"))
+    $("#card-group").onchange = (event) => {
+      cardGroupNumber = Number(event.target.value);
+      unlockedNotice = null;
+      index = 0;
+      revealed = false;
+      render();
+      $("#card-group").focus();
+    };
   if ($("#flip"))
     $("#flip").onclick = () => {
       revealed = !revealed;
@@ -788,7 +810,7 @@ function render() {
     $("#speak").onclick = () =>
       speaker(
         currentPage === "cards"
-          ? active()[index % active().length].word
+          ? cardGroup().words[index].word
           : currentList[index % currentList.length].word,
       );
   if ($("#next"))
@@ -800,24 +822,9 @@ function render() {
         render();
       } else next();
     };
-  if ($("#master"))
-    $("#master").onclick = () => {
-      const w = active()[index % active().length];
-      saved.mastered = unique([...saved.mastered, wordId({ ...w, theme })]);
-      saved.wrong = saved.wrong.filter((x) => x !== wordId({ ...w, theme }));
-      persist();
-      next();
-    };
-  if ($("#review"))
-    $("#review").onclick = () => {
-      const w = active()[index % active().length];
-      saved.mastered = saved.mastered.filter(
-        (x) => x !== wordId({ ...w, theme }),
-      );
-      saved.wrong = unique([...saved.wrong, wordId({ ...w, theme })]);
-      persist();
-      next();
-    };
+  for (const action of ["master", "review", "skip"]) {
+    $("#" + action)?.addEventListener("click", () => completeCard(action));
+  }
   if ($("#answer"))
     $("#answer").onsubmit = (e) => {
       e.preventDefault();
@@ -827,10 +834,14 @@ function render() {
         right = guess === w.word.toLowerCase();
       answered = true;
       lastFeedback = { kind: "word", right, w, guess };
-      tally(right, w);
+      const newlyUnlocked = tally(right, w);
       renderFeedback();
       $("#guess").disabled = true;
       $("#answer button").disabled = true;
+      if (newlyUnlocked) {
+        updateReadingNotice();
+        $(".reading-notice [data-read]").focus();
+      }
     };
   document.querySelectorAll(".option").forEach(
     (b) =>
@@ -861,24 +872,34 @@ function render() {
         )
       ) {
         saved = { mastered: [], wrong: [], correct: 0, attempts: 0 };
+        unlockedNotice = null;
         persist();
         render();
       }
     };
 }
 document.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-page],[data-go]");
+  const b = e.target.closest("[data-page],[data-go],[data-read]");
   if (!b) return;
   lastFeedback = null;
-  currentPage = b.dataset.page || b.dataset.go;
-  if (b.dataset.theme) theme = b.dataset.theme;
-  index = 0;
+  openReading = readingById.get(b.dataset.read) || null;
+  unlockedNotice = null;
+  currentPage = openReading ? "reading" : b.dataset.page || b.dataset.go;
+  const group = readingById.get(b.dataset.groupStart);
+  theme = group?.category.id || b.dataset.theme || theme;
+  cardGroupNumber = group?.number ?? 0;
+  const covered = group ? coveredWords() : null;
+  const firstUncovered = group?.words.findIndex((word) =>
+    !covered.has(wordId({ ...word, theme })),
+  );
+  index = Math.max(firstUncovered ?? 0, 0);
   currentList = [];
   answered = false;
   revealed = false;
   render();
+  if (currentPage === "reading") $("#main h1").focus();
 });
-render();
+
 
 document.querySelector("#language").addEventListener("change", (e) => {
   const guess = document.querySelector("#guess")?.value;

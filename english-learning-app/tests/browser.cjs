@@ -33,9 +33,9 @@ const assert = require("node:assert/strict");
     assert.equal(
       new Set(data.flatMap((t) => t.words.map((w) => w.word.toLowerCase())))
         .size,
-      400,
+      435,
     );
-    assert.equal(data.flatMap((t) => t.words).length, 405);
+    assert.equal(data.flatMap((t) => t.words).length, 440);
     for (const t of data)
       for (const w of t.words) assert.ok(w.word && w.zh && w.example);
     const allowedPos = new Set(["n.", "v.", "adj.", "n. phr."]);
@@ -57,7 +57,7 @@ const assert = require("node:assert/strict");
     assert.equal(await page.locator("html").getAttribute("lang"), "en");
     assert.match(
       await page.locator("main").innerText(),
-      /400 distinct words across 9 categories/,
+      /435 distinct words across 9 categories/,
     );
     assert.deepEqual(
       JSON.parse(
@@ -129,10 +129,13 @@ const assert = require("node:assert/strict");
     for (const t of data) {
       await page.click('[data-page="cards"]');
       await page.selectOption("#theme", t.id);
-      for (const w of t.words) {
-        const label = await page.locator("#flip").innerText();
-        assert.ok(label.includes(w.word) && label.includes(w.pos));
-        await page.click("#next");
+      for (let start = 0; start < t.words.length; start += 40) {
+        if (t.words.length > 40) await page.selectOption("#card-group", String(start / 40));
+        for (const w of t.words.slice(start, start + 40)) {
+          const label = await page.locator("#flip").innerText();
+          assert.ok(label.includes(w.word) && label.includes(w.pos), t.id + ":" + w.word);
+          await page.click("#next");
+        }
       }
     }
     await page.click('[data-page="spelling"]');
@@ -155,7 +158,7 @@ const assert = require("node:assert/strict");
       await page.click("#next");
     }
     await page.click('[data-page="progress"]');
-    assert.match(await page.locator("main").innerText(), /1 \/ 405/);
+    assert.match(await page.locator("main").innerText(), /1 \/ 440/);
     await page.reload();
     assert.equal(await page.locator("#language").inputValue(), "en");
     await page.setViewportSize({ width: 375, height: 812 });
@@ -181,7 +184,7 @@ const assert = require("node:assert/strict");
     });
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: 405 POS labels, bilingual cards and feedback, logo, vocabulary, saved progress, all activities, mobile layout, and no browser errors.",
+      "PASS: 440 POS labels, bilingual cards and feedback, logo, vocabulary, saved progress, all activities, mobile layout, and no browser errors.",
     );
   } finally {
     await browser.close();

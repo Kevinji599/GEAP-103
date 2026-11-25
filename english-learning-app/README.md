@@ -1,6 +1,6 @@
 # WordSpring 🌱 — English Learning App
 
-**GEAP 103 Major Project · Project members: Kevin & Emma · v1.1**
+**GEAP 103 Major Project · Project members: Kevin & Emma · v1.2**
 
 WordSpring is a bilingual, interactive English-learning web app designed for **Chinese-speaking students**. It makes vocabulary and grammar practice more engaging through short lessons, flashcards, spelling games, and audio dictation.
 
@@ -17,9 +17,9 @@ WordSpring is a bilingual, interactive English-learning web app designed for **C
 | Themes                | Everyday Life, School & Campus, Work & Communication, Travel                               |
 | Vocabulary            | Useful English words, Chinese definitions, example sentences, and audio pronunciation      |
 
-## Vocabulary bank: 400 distinct words
+## Vocabulary bank: 435 distinct words
 
-Nine categories now contain **400 distinct English words and phrases**, each with a simplified-Chinese meaning and an English example. There are **405 themed entries** because five existing words occur in two original themes. Those entries and their IDs are retained so existing browser progress remains compatible.
+Nine categories now contain **435 distinct English words and phrases**, each with a simplified-Chinese meaning and an English example. There are **440 themed entries** because five existing words occur in two original themes. Those entries and their IDs are retained so existing browser progress remains compatible.
 
 | Category                            | Entries |
 | ----------------------------------- | ------: |
@@ -30,8 +30,8 @@ Nine categories now contain **400 distinct English words and phrases**, each wit
 | Emotions & Social Life / 情绪与社交 |      40 |
 | Medical & Healthcare / 医疗用语     |      80 |
 | Industry & Manufacturing / 工业用语 |      80 |
-| Kitchen & Cooking / 厨房用语        |      25 |
-| Technology & Computing / 科技用语   |      20 |
+| Kitchen & Cooking / 厨房用语        |      40 |
+| Technology & Computing / 科技用语   |      40 |
 
 The original vocabulary is aimed at A2–B1 learners; the new specialist categories introduce occupational vocabulary beyond that range. The same category vocabulary powers flashcards, spelling, and dictation.
 
@@ -72,7 +72,7 @@ GEAP-103/
     README.md         # Project description and team plan
     index.html        # Web page and navigation
     styles.css        # Responsive styling
-    vocabulary.js     # 405 bilingual entries (400 distinct words) in nine categories
+    vocabulary.js     # 440 bilingual entries (435 distinct words) in nine categories
     app.js            # Games, progress and deterministic scoring
     AI_INTEGRATION.md # Safe API integration plan for a future release
 ```
@@ -131,3 +131,17 @@ Additional browser checks: `node english-learning-app/tests/enhancements.cjs`.
 ## Cambridge pronunciation link
 
 On flashcards, **剑桥发音📢 / Cambridge 📢** appears immediately below the browser pronunciation button. It opens the current word's Cambridge English pronunciation page in a new tab. The link follows the active word and category, including hyphenated multiword terms. This is an external dictionary link; the app does not download or embed Cambridge audio. Availability of individual entries is controlled by Cambridge.
+
+## Reading review
+
+Each category is divided in its original order into groups of 40, with two groups each for Healthcare and Industry. The expanded Kitchen and Technology categories each have one group. Reading Review shows the 11 passages and progress toward unlocking each one.
+
+Mark a flashcard **Mark as learned**, **Review later**, or **Skip** to count it toward the group's coverage. **Next card** only moves to another card. A skip leaves mastery and mistakes as they were. Existing mastered words, mistakes and per-word spelling or dictation answers count toward coverage, as do new spelling and dictation submissions. Old aggregate scores have no word IDs to use for unlocking.
+
+After all 40 words are covered, a prompt offers **Start reading** or **Read later**. Each passage highlights its target vocabulary. Select a highlight to see its Chinese meaning and part of speech. Each quiz has three multiple-choice questions and three fill-in questions, worth one point each. Fill-in answers ignore case and extra whitespace. Scores below half earn one star, scores from half up to full credit earn two, and full credit earns three. Each submission shows the correct answers and explanations in both languages.
+
+Draft answers, completion and best scores are saved in the same browser. Open the same passage after a reload to continue. **Try again** clears the current answers while keeping the best result. Reading scores are independent of the spelling, dictation and grammar practice rating. **Clear local progress** clears the reading records as well.
+
+The reading text and questions live in `reading-content.js`, and the groups, coverage and quiz logic live in `reading.js`. Update the asset version in `index.html` when publishing changes to the scripts or styles.
+
+Reading-specific browser checks: `node english-learning-app/tests/reading.cjs`.
