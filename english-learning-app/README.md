@@ -1,6 +1,6 @@
 # WordSpring 🌱 — English Learning App
 
-**GEAP 103 Major Project · Project members: Kevin & Emma · v1.2**
+**GEAP 103 Major Project · Project members: Kevin & Emma · v1.3**
 
 WordSpring is a bilingual, interactive English-learning web app designed for **Chinese-speaking students**. It makes vocabulary and grammar practice more engaging through short lessons, flashcards, spelling games, and audio dictation.
 
@@ -43,7 +43,7 @@ Use the **界面语言 / UI language** selector in the header to switch between 
 
 - **Lessons:** Nine categorized word lists, with Chinese translations and contextual English examples.
 - **Vocabulary Flashcards:** Flip a card to see the meaning; mark it as learned or review again.
-- **Spelling Challenge:** See the Chinese meaning, then type the English word. Exact spelling is checked locally (case and outside whitespace ignored).
+- **Spelling Challenge:** Read the Chinese meaning or the English clue, then type the target English word. Exact spelling is checked locally (case and outside whitespace ignored).
 - **Dictation:** Listen to a word spoken by the browser and type what you hear. The answer is checked locally.
 - **Grammar Quiz:** Answer multiple-choice questions with immediate explanations.
 - **Progress:** Track mastered words, correct/attempted answers, accuracy, and words to review.
@@ -145,3 +145,14 @@ Draft answers, completion and best scores are saved in the same browser. Open th
 The reading text and questions live in `reading-content.js`, and the groups, coverage and quiz logic live in `reading.js`. Update the asset version in `index.html` when publishing changes to the scripts or styles.
 
 Reading-specific browser checks: `node english-learning-app/tests/reading.cjs`.
+
+
+## Browsing, spelling clues and fonts
+
+The homepage shows the learning summary. Open **Categories** to browse all nine vocabulary topics or pick one to start its flashcards.
+
+In English mode, all 440 spelling entries have a synonym or short English description for the sense being tested. Chinese mode shows the Chinese meaning. Both modes use the same spelling answers and progress records.
+
+Poppins is served locally as WOFF2 under the [SIL Open Font License](assets/fonts/Poppins-OFL.txt). Chinese text uses a locally installed Founder Lanting Hei face when available, then tries the device’s Chinese sans-serif fonts. A licensed webfont would be needed to serve Founder Lanting to devices where it is absent.
+
+Reading ratings use text labels, such as **2 of 3 stars**, with the same scoring thresholds and saved results.

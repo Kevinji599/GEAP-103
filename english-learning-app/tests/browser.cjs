@@ -37,7 +37,10 @@ const assert = require("node:assert/strict");
     );
     assert.equal(data.flatMap((t) => t.words).length, 440);
     for (const t of data)
-      for (const w of t.words) assert.ok(w.word && w.zh && w.example);
+      for (const w of t.words) {
+        assert.ok(w.word && w.zh && w.example && w.clue);
+        assert.ok(!w.clue.toLowerCase().includes(w.word.toLowerCase()), t.id + ":" + w.word);
+      }
     const allowedPos = new Set(["n.", "v.", "adj.", "n. phr."]);
     for (const t of data)
       for (const w of t.words)
@@ -67,6 +70,33 @@ const assert = require("node:assert/strict");
       ),
       before,
     );
+    assert.equal(await page.locator(".hero .stat").count(), 3);
+    assert.doesNotMatch(await page.locator("nav").innerText(), />/);
+    assert.equal(await page.locator("main .category-grid").count(), 0);
+    assert.equal(await page.locator(".hero .eyebrow").innerText(), "LEARN ENGLISH, ONE WORD AT A TIME");
+    const type = await page.evaluate(async () => {
+      const fonts = await document.fonts.load('800 36px "Poppins"');
+      const headline = getComputedStyle(document.querySelector(".hero h1"));
+      const intro = getComputedStyle(document.querySelector(".hero .lead"));
+      return {
+        loaded: fonts.some((font) => font.family === "Poppins" && font.status === "loaded"),
+        fontFamily: headline.fontFamily,
+        size: parseFloat(headline.fontSize),
+        weight: Number(headline.fontWeight),
+        introSize: parseFloat(intro.fontSize),
+      };
+    });
+    assert.ok(type.loaded);
+    assert.match(type.fontFamily, /Poppins.*Founder Lanting/);
+    assert.ok(type.size >= 40 && type.weight >= 700 && type.introSize >= 18);
+    await page.click('.hero [data-go="categories"]');
+    assert.equal(await page.locator("main h1").innerText(), "Browse categories");
+    assert.equal(await page.locator(".category-grid .tile").count(), 9);
+    await page.selectOption("#language", "zh");
+    assert.equal(await page.locator("main h1").innerText(), "按分类学习");
+    await page.locator('.category-grid [data-theme="technology"]').click();
+    assert.equal(await page.locator("#theme").inputValue(), "technology");
+    await page.selectOption("#language", "en");
     for (const t of data) {
       await page.click('[data-page="cards"]');
       await page.selectOption("#theme", t.id);
@@ -101,8 +131,15 @@ const assert = require("node:assert/strict");
       await page.selectOption("#theme", "medical");
       await page.fill("#guess", "unfinished");
       const prompt = await page.locator(".panel h2").innerText();
+      const currentWord = await page.evaluate(() => currentList[index]);
+      if (mode === "spelling") {
+        assert.equal(await page.locator("#spelling-clue").innerText(), currentWord.clue);
+      }
       await page.selectOption("#language", "zh");
       assert.equal(await page.locator("#guess").inputValue(), "unfinished");
+      if (mode === "spelling") {
+        assert.equal(await page.locator("#spelling-clue").innerText(), currentWord.zh);
+      }
       await page.selectOption("#language", "en");
       assert.equal(await page.locator(".panel h2").innerText(), prompt);
       const answer = await page.evaluate(
@@ -164,6 +201,7 @@ const assert = require("node:assert/strict");
     await page.setViewportSize({ width: 375, height: 812 });
     for (const mode of [
       "home",
+      "categories",
       "cards",
       "spelling",
       "dictation",
@@ -184,7 +222,7 @@ const assert = require("node:assert/strict");
     });
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: 440 POS labels, bilingual cards and feedback, logo, vocabulary, saved progress, all activities, mobile layout, and no browser errors.",
+      "PASS: 440 English clues and POS labels, bilingual spelling and feedback, Poppins, home and categories, logo, saved progress, all activities, mobile layout, and no browser errors.",
     );
   } finally {
     await browser.close();

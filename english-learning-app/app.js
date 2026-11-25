@@ -27,6 +27,7 @@ function updateChrome() {
   );
   const labels = {
     home: ["首页", "Home"],
+    categories: ["按分类学习", "Categories"],
     cards: ["词汇卡片", "Flashcards"],
     spelling: ["拼写挑战", "Spelling"],
     dictation: ["单词听写", "Dictation"],
@@ -171,11 +172,11 @@ function tally(correct, w) {
   persist();
   return newlyUnlocked;
 }
-function categoryTiles() {
+function categories() {
   return (
-    "<h2>" +
+    '<h1 tabindex="-1">' +
     tr("按分类学习", "Browse categories") +
-    '</h2><div class="grid">' +
+    '</h1><div class="grid category-grid">' +
     themes
       .map(
         (t) =>
@@ -196,7 +197,9 @@ function categoryTiles() {
 }
 function home() {
   return (
-    '<section class="hero"><div class="eyebrow">LEARN ENGLISH, ONE WORD AT A TIME</div><h1>' +
+    '<section class="hero"><div class="eyebrow">' +
+    tr("从一个单词开始学英语", "LEARN ENGLISH, ONE WORD AT A TIME") +
+    "</div><h1>" +
     tr(
       "让每个单词，成为进步的一步。",
       "Grow your English, one word at a time.",
@@ -206,9 +209,11 @@ function home() {
       "为中文学习者设计的英语学习 App。435 个不同词汇，9 个实用分类，重点加入医疗与工业用语。练习、听写、复习，不用注册。",
       "Practical English for Chinese-speaking learners. 435 distinct words across 9 categories, including healthcare and industry. Practice without an account.",
     ) +
-    '</p><button class="btn" data-go="cards">' +
-    tr("开始学习 →", "Start learning \u2192") +
-    '</button></section><div class="stats"><div class="stat"><small>' +
+    '</p><div class="hero-actions"><button class="btn" data-go="cards">' +
+    tr("开始学习", "Start learning") +
+    '</button><button class="hero-secondary" data-go="categories">' +
+    tr("按分类学习", "Browse categories") +
+    '</button></div><div class="stats hero-stats"><div class="stat"><small>' +
     tr("总词汇", "Distinct words") +
     "</small><strong>" +
     new Set(words.map((w) => w.word.toLowerCase())).size +
@@ -220,7 +225,7 @@ function home() {
     tr("练习正确率", "Practice accuracy") +
     "</small><strong>" +
     (saved.attempts ? Math.round((saved.correct / saved.attempts) * 100) : 0) +
-    "%</strong></div></div><h2>" +
+    "%</strong></div></div></section><h2>" +
     tr("选择学习方式", "Choose an activity") +
     '</h2><div class="grid">' +
     [
@@ -234,7 +239,7 @@ function home() {
         "spelling",
         "✍️",
         tr("拼写挑战", "Spelling challenge"),
-        tr("中文提示，自己拼写", "Spell words from Chinese prompts"),
+        tr("根据词义提示拼写单词", "Spell words from English clues"),
       ],
       [
         "dictation",
@@ -262,8 +267,7 @@ function home() {
           "</small></button>",
       )
       .join("") +
-    "</div>" +
-    categoryTiles()
+    "</div>"
   );
 }
 const partsOfSpeech = {
@@ -408,7 +412,7 @@ function game(kind) {
           )
         : tr(
             "根据中文释义，拼写正确的英语单词。",
-            "Read the Chinese meaning and spell the English word.",
+            "Use the English synonym or clue to spell the target word.",
           ),
     ) +
     posNote() +
@@ -421,7 +425,7 @@ function game(kind) {
     "</div><h2>" +
     (dict
       ? "" + tr("🎧 听一听", "\ud83c\udfa7 Listen") + ""
-      : esc(w.zh) + posBadge(w)) +
+      : '<span id="spelling-clue">' + esc(tr(w.zh, w.clue)) + "</span>" + posBadge(w)) +
     "</h2>" +
     (dict
       ? '<button id="speak">' +
@@ -768,6 +772,7 @@ function render() {
   main.innerHTML = (
     {
       home,
+      categories,
       cards,
       spelling: () => game("spelling"),
       dictation: () => game("dictation"),
@@ -897,7 +902,7 @@ document.addEventListener("click", (e) => {
   answered = false;
   revealed = false;
   render();
-  if (currentPage === "reading") $("#main h1").focus();
+  if (currentPage === "reading" || currentPage === "categories") $("#main h1").focus();
 });
 
 

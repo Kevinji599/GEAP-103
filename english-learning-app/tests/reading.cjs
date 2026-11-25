@@ -142,7 +142,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("fieldset").first().locator(":checked").inputValue(), choices[0][1]);
 
     await page.locator('#reading-quiz button[type="submit"]').click();
-    assert.match(await page.locator("#reading-result").innerText(), /2 \/ 6 ★☆☆/);
+    assert.match(await page.locator("#reading-result").innerText(), /2 \/ 6 1 星/);
     assert.equal(await page.locator(".reading-explanation").count(), 6);
     assert.equal(await page.locator(".reading-explanation [lang=zh-CN]").count(), 6);
     assert.equal(await page.locator(".reading-explanation p[lang=en]").count(), 6);
@@ -152,29 +152,32 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("fieldset :checked").count(), 0);
     for (let i = 0; i < 3; i++) await answerChoice(i);
     await page.locator('#reading-quiz button[type="submit"]').click();
-    assert.match(await page.locator("#reading-result").innerText(), /3 \/ 6 ★★☆/);
+    assert.match(await page.locator("#reading-result").innerText(), /3 \/ 6 2 星/);
 
     await page.click("#reading-retry");
     for (let i = 0; i < 3; i++) await answerChoice(i);
     for (let i = 0; i < 2; i++) await page.fill("#reading-answer-" + (i + 3), blanks[i][1]);
     await page.locator('#reading-quiz button[type="submit"]').click();
-    assert.match(await page.locator("#reading-result").innerText(), /5 \/ 6 ★★☆/);
+    assert.match(await page.locator("#reading-result").innerText(), /5 \/ 6 2 星/);
 
     await page.click("#reading-retry");
     for (let i = 0; i < 3; i++) await answerChoice(i);
     for (let i = 0; i < 3; i++) await page.fill("#reading-answer-" + (i + 3), blanks[i][1]);
     await page.locator('#reading-quiz button[type="submit"]').click();
-    assert.match(await page.locator("#reading-result").innerText(), /6 \/ 6 ★★★/);
+    assert.match(await page.locator("#reading-result").innerText(), /6 \/ 6 3 星/);
     assert.equal(await page.evaluate(() => readingStars(199, 200)), 2);
 
     await page.click("#reading-retry");
     await page.locator('#reading-quiz button[type="submit"]').click();
-    assert.match(await page.locator("#reading-result").innerText(), /0 \/ 6 ★☆☆/);
+    assert.match(await page.locator("#reading-result").innerText(), /0 \/ 6 1 星/);
     await page.reload();
     await goReading();
-    assert.match(await dailyGroup.innerText(), /最佳成绩 6 \/ 6 ★★★/);
+    assert.match(await dailyGroup.innerText(), /最佳成绩 6 \/ 6 3 星/);
     await openDaily();
-    assert.match(await page.locator("#reading-result").innerText(), /0 \/ 6 ★☆☆.*6 \/ 6 ★★★/s);
+    assert.match(await page.locator("#reading-result").innerText(), /0 \/ 6 1 星.*6 \/ 6 3 星/s);
+    assert.doesNotMatch(await page.locator("main").innerText(), /[★☆·]/);
+    await page.selectOption("#language", "en");
+    assert.match(await page.locator("#reading-result").innerText(), /0 \/ 6 1 of 3 stars.*6 \/ 6 3 of 3 stars/s);
     stored = await readSaved();
     assert.ok(stored.mastered.includes(daily[38]));
     assert.ok(!stored.mastered.includes(daily[39]));
@@ -237,7 +240,7 @@ const { chromium } = require("playwright");
         await page.fill("#reading-answer-" + (i + 3), blanks[i][1]);
       }
       await page.locator('#reading-quiz button[type="submit"]').click();
-      assert.match(await page.locator("#reading-result").innerText(), /6 \/ 6 ★★★/);
+      assert.match(await page.locator("#reading-result").innerText(), /6 \/ 6 3 星/);
     }
     assert.deepEqual(errors, []);
     console.log("PASS: legacy coverage, group navigation, next/skip/master, unlock prompt, glosses, draft and result persistence, retries, stars, assessment isolation, bilingual and mobile layouts.");

@@ -55,8 +55,8 @@ function cardGroup() {
 function groupLabel(group) {
   const category = group.category;
   return tr(
-    `${category.nameZh} · 第 ${group.number + 1} 组`,
-    `${category.name} · Group ${group.number + 1}`,
+    `${category.nameZh} 第 ${group.number + 1} 组`,
+    `${category.name} Group ${group.number + 1}`,
   );
 }
 
@@ -70,7 +70,7 @@ function cardGroupControls() {
        ).join("")}</select>`
     : "";
   return `<div class="card-group-status">${picker}
-    <p class="muted">${tr("本组学习覆盖", "Group coverage")} · ${readingCoverage(group)} / ${READING_GROUP_SIZE}</p>
+    <p class="muted">${tr("本组学习覆盖", "Group coverage")} ${readingCoverage(group)} / ${READING_GROUP_SIZE}</p>
   </div>`;
 }
 
@@ -121,8 +121,10 @@ function readingStars(score, total) {
 
 function readingScore(score, total) {
   const stars = readingStars(score, total);
-  return `${score} / ${total} <span class="reading-stars" role="img"
-      aria-label="${tr(`${stars} 星`, `${stars} of 3 stars`)}">${"★".repeat(stars) + "☆".repeat(3 - stars)}</span>`;
+  return `${score} / ${total} <span class="reading-rating">${tr(
+    `${stars} 星`,
+    `${stars} of 3 stars`,
+  )}</span>`;
 }
 
 function readingIndex() {
@@ -139,12 +141,12 @@ function readingIndex() {
       return `<section class="panel reading-group" data-group="${group.id}">
         <p class="muted">${esc(groupLabel(group))}</p>
         <h2>${esc(tr(...group.title))}</h2>
-        <p><strong>${coverage} / ${READING_GROUP_SIZE}</strong> · ${unlocked
-          ? tr("已解锁", "Unlocked") : tr("未解锁", "Locked")}</p>
+        <p class="reading-status"><strong>${coverage} / ${READING_GROUP_SIZE}</strong> <span>${unlocked
+          ? tr("已解锁", "Unlocked") : tr("未解锁", "Locked")}</span></p>
         <progress max="${READING_GROUP_SIZE}" value="${coverage}"
           aria-label="${esc(groupLabel(group))}"></progress>
         ${record?.best !== undefined
-          ? `<p>${tr("已完成 · 最佳成绩", "Completed · Best score")} ${readingScore(record.best, total)}</p>`
+          ? `<p>${tr("最佳成绩", "Best score")} ${readingScore(record.best, total)}</p>`
           : ""}
         <div class="controls">${unlocked
           ? `<button class="btn" data-read="${group.id}">${tr("开始阅读", "Start reading")}</button>`
@@ -204,7 +206,7 @@ function quizField(question, i, answers, submitted) {
     ${control}
     ${submitted ? `<div class="reading-explanation">
       <p class="${correct ? "good" : "bad"}">${correct ? tr("正确", "Correct") : tr("错误", "Incorrect")}
-        · ${tr("正确答案", "Correct answer")} <strong lang="en">${esc(answer)}</strong></p>
+        <span class="reading-correct-answer">${tr("正确答案", "Correct answer")} <strong lang="en">${esc(answer)}</strong></span></p>
       <p lang="zh-CN">${esc(zh)}</p><p lang="en">${esc(en)}</p>
     </div>` : ""}
   </fieldset>`;

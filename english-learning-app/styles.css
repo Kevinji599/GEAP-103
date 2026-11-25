@@ -1,5 +1,52 @@
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-latin-500-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-latin-600-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-latin-700-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url("assets/fonts/poppins-latin-800-normal.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+}
+/* Use locally installed Founder fonts when available. */
+@font-face {
+  font-family: "Founder Lanting";
+  src: local("FZLanTingHeiS-R-GB"), local("FZLanTingHei-R-GBK"),
+    local("方正兰亭黑简体"), local("方正兰亭黑_GBK");
+  font-style: normal;
+  font-weight: 400 500;
+}
+@font-face {
+  font-family: "Founder Lanting";
+  src: local("FZLanTingHeiS-DB1-GB"), local("FZLanTingHeiS-B-GB"),
+    local("方正兰亭黑简体 DemiBold"), local("方正兰亭粗黑简体");
+  font-style: normal;
+  font-weight: 600 800;
+}
 :root {
-  font-family: system-ui, "Noto Sans SC", sans-serif;
+  font-family: "Poppins", "Founder Lanting", "FZLanTingHei", "方正兰亭黑",
+    "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.65;
   color: #214b40;
   background: #f6f8f4;
 }
@@ -12,25 +59,27 @@ body {
 header {
   background: #194038;
   color: white;
-  padding: 22px 5%;
-  display: flex;
+  padding: 1rem 5%;
+  display: grid;
+  grid-template-areas: "brand language" "navigation navigation";
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 22px;
-  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
 }
 .brand {
+  grid-area: brand;
   font-size: 24px;
   font-weight: 800;
 }
 .brand small {
-  font-size: 11px;
+  font-size: 0.8rem;
   display: block;
-  font-weight: 400;
+  font-weight: 500;
   color: #cfddd5;
   margin-top: 3px;
 }
 nav {
+  grid-area: navigation;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -47,7 +96,7 @@ button {
   padding: 12px 17px;
   background: #e7eee8;
   color: #235347;
-  font-weight: 650;
+  font-weight: 700;
 }
 button:hover {
   background: #cce2d1;
@@ -61,7 +110,11 @@ select:focus-visible {
 nav button {
   background: transparent;
   color: white;
-  font-size: 13px;
+  font-size: 0.89rem;
+  padding: 0.6rem 0.8rem;
+}
+nav button:hover {
+  background: #2c5b4e;
 }
 nav button.active {
   background: #376555;
@@ -72,27 +125,72 @@ main {
   min-height: 65vh;
 }
 .eyebrow {
-  color: #749885;
+  color: #496a5a;
   letter-spacing: 2px;
-  font-size: 12px;
+  font-size: 0.84rem;
   font-weight: 700;
 }
 .hero {
-  background: #e7f0e7;
+  background: linear-gradient(130deg, #eff7ed 18%, #dceee3 100%);
+  border: 1px solid #cedfd2;
   border-radius: 25px;
-  padding: 50px 6%;
+  padding: clamp(1.6rem, 6vw, 4rem);
+}
+.hero .eyebrow {
+  font-size: clamp(0.89rem, 1.7vw, 1.03rem);
+  letter-spacing: 0.08em;
+}
+.hero h1 {
+  max-width: 15ch;
+  margin: 0.3em 0;
+  font-size: clamp(2.45rem, 7vw, 4.6rem);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+:lang(zh) .hero h1 {
+  max-width: 17em;
+  letter-spacing: normal;
+}
+.hero .lead {
+  max-width: 37rem;
+  font-size: clamp(1.07rem, 2.2vw, 1.28rem);
+  line-height: 1.65;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.hero-secondary {
+  border: 1px solid #87ad97;
+  background: #f3faf4;
+}
+.hero .hero-stats {
+  margin: 1.8rem 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+.hero-stats .stat {
+  border-color: #cadfd1;
+  background: #f8fcf8;
+  padding: 0.85rem 1rem;
+}
+.hero-stats .stat strong {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2rem);
 }
 h1 {
-  font-size: clamp(29px, 4vw, 43px);
+  font-size: clamp(2rem, 4vw, 2.65rem);
+  line-height: 1.16;
+  font-weight: 800;
   letter-spacing: -1px;
   margin: 14px 0;
   color: #1b483b;
 }
 .lead {
-  color: #71867c;
+  color: #486457;
   line-height: 1.8;
   max-width: 620px;
-  font-size: 15px;
+  font-size: 1rem;
 }
 .btn {
   background: #245b49;
@@ -104,7 +202,7 @@ h1 {
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin: 25px 0;
 }
@@ -122,11 +220,11 @@ h1 {
 }
 .tile strong {
   display: block;
-  font-size: 18px;
+  font-size: 1.17rem;
   margin: 9px 0;
 }
 .tile small {
-  color: #829489;
+  color: #506d60;
   line-height: 1.7;
 }
 .tile span {
@@ -134,13 +232,13 @@ h1 {
 }
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   margin: 24px 0;
 }
 .stat small {
   display: block;
-  color: #84958d;
+  color: #506d60;
 }
 .stat strong {
   font-size: 29px;
@@ -153,7 +251,9 @@ h1 {
   padding: 35px;
 }
 .panel h2 {
-  font-size: 34px;
+  font-size: clamp(1.45rem, 4vw, 2rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 .card {
   display: block;
@@ -178,8 +278,8 @@ h1 {
   margin: 18px 0;
 }
 .muted {
-  color: #81968a;
-  font-size: 13px;
+  color: #506d60;
+  font-size: 0.89rem;
   line-height: 1.8;
 }
 .good {
@@ -225,7 +325,7 @@ select {
   border-radius: 20px;
   padding: 8px 12px;
   margin: 4px;
-  font-size: 12px;
+  font-size: 0.84rem;
 }
 .bar {
   height: 15px;
@@ -240,18 +340,34 @@ select {
 footer {
   text-align: center;
   padding: 30px;
-  color: #8da093;
-  font-size: 11px;
+  color: #506d60;
+  font-size: 0.8rem;
 }
 @media (max-width: 650px) {
   header {
-    padding: 18px 4%;
+    padding: 0.75rem 4%;
+    column-gap: 0.5rem;
+  }
+  header .brand-logo {
+    width: 140px;
+  }
+  nav {
+    gap: 0.2rem;
+  }
+  nav button {
+    padding: 0.55rem 0.6rem;
   }
   .grid {
     grid-template-columns: 1fr;
   }
-  .hero {
-    padding: 30px 22px;
+  .hero .hero-stats {
+    gap: 0.4rem;
+  }
+  .hero-stats .stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
   }
   .panel {
     padding: 25px 12px;
@@ -270,10 +386,12 @@ footer {
   }
 }
 .language-control {
+  grid-area: language;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 0.89rem;
 }
 .language-control select {
   margin: 0;
@@ -308,7 +426,7 @@ button:disabled {
   border-radius: 6px;
   background: #e2eee7;
   color: #305d50;
-  font-size: 13px;
+  font-size: 0.89rem;
   font-weight: 600;
   line-height: 1.5;
   vertical-align: middle;
@@ -378,7 +496,7 @@ button:disabled {
 }
 .score-number small {
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 500;
 }
 .level-estimate {
   font-weight: 700;
@@ -386,7 +504,7 @@ button:disabled {
 }
 .skill-scores {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 .skill-score {
@@ -404,7 +522,7 @@ button:disabled {
   margin: 8px 0;
 }
 .skill-score small {
-  font-size: 12px;
+  font-size: 0.84rem;
   color: #526e60;
 }
 .assessment-guidance {
@@ -417,7 +535,7 @@ button:disabled {
 }
 .assessment details {
   text-align: left;
-  font-size: 13px;
+  font-size: 0.89rem;
   line-height: 1.8;
 }
 .assessment summary {
@@ -447,7 +565,7 @@ button:disabled {
   background: #e7eee8;
   color: #235347;
   font: inherit;
-  font-weight: 650;
+  font-weight: 700;
   text-decoration: none;
 }
 .pronunciation-link:hover {
@@ -462,7 +580,7 @@ button:disabled {
   margin: 1rem 0;
 }
 .reading-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
 }
 .reading-group h2 {
   margin-block: 0.4rem;
@@ -518,7 +636,7 @@ button:disabled {
   border-radius: 9px;
 }
 #reading-quiz legend {
-  font-weight: 650;
+  font-weight: 700;
 }
 #reading-quiz input[type="text"] {
   width: min(100%, 24rem);
@@ -533,7 +651,25 @@ button:disabled {
 .reading-explanation p {
   margin-block: 0.25rem;
 }
-.reading-stars {
-  color: #805500;
+.reading-status span,
+.reading-rating,
+.reading-correct-answer {
+  margin-inline-start: 0.45em;
+}
+.reading-rating {
+  color: #486457;
+  font-weight: 700;
   white-space: nowrap;
+}
+.category-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+.stat,
+.skill-score,
+.reading-group {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#spelling-clue {
+  text-wrap: balance;
 }
