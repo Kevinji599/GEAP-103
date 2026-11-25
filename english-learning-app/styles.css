@@ -44,7 +44,7 @@
 :root {
   font-family: "Poppins", "Founder Lanting", "FZLanTingHei", "方正兰亭黑",
     "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   line-height: 1.65;
   color: #214b40;
@@ -59,30 +59,42 @@ body {
 header {
   background: #194038;
   color: white;
-  padding: 1rem 5%;
+  padding: clamp(0.75rem, 2vw, 1.45rem) clamp(0.75rem, 4vw, 3rem);
   display: grid;
-  grid-template-areas: "brand language" "navigation navigation";
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.45rem 1rem;
+  gap: 0.8rem 1rem;
 }
-.brand {
-  grid-area: brand;
-  font-size: 24px;
-  font-weight: 800;
+.header-settings {
+  display: grid;
+  justify-items: end;
+  gap: 0.32rem;
 }
-.brand small {
-  font-size: 0.8rem;
-  display: block;
-  font-weight: 500;
-  color: #cfddd5;
-  margin-top: 3px;
+.language-control {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.language-control select {
+  margin: 0;
+  padding: 0.38rem 0.5rem;
+  color: #194038;
+}
+.header-credit {
+  color: #dceae2;
+  font-size: 0.85rem;
 }
 nav {
-  grid-area: navigation;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border: 1px solid #41675a;
+  border-radius: 15px;
+  background: #12352e;
 }
 button,
 input,
@@ -108,16 +120,44 @@ select:focus-visible {
   outline-offset: 2px;
 }
 nav button {
-  background: transparent;
-  color: white;
-  font-size: 0.89rem;
-  padding: 0.6rem 0.8rem;
+  min-height: 3rem;
+  padding: 0.45rem 0.35rem;
+  background: #244d41;
+  color: #f7fcf8;
+  font-size: 1rem;
+  line-height: 1.25;
+  text-wrap: balance;
 }
 nav button:hover {
-  background: #2c5b4e;
+  background: #386655;
 }
 nav button.active {
-  background: #376555;
+  background: #e4f3e7;
+  color: #194038;
+}
+@media (max-width: 1150px) {
+  nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 540px) {
+  header {
+    gap: 0.65rem 0.4rem;
+  }
+  nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+  nav button {
+    min-height: 2.55rem;
+  }
+  .language-control {
+    gap: 0.35rem;
+  }
+  .header-credit {
+    font-size: 0.8rem;
+  }
 }
 main {
   width: min(980px, 92%);
@@ -344,19 +384,6 @@ footer {
   font-size: 0.8rem;
 }
 @media (max-width: 650px) {
-  header {
-    padding: 0.75rem 4%;
-    column-gap: 0.5rem;
-  }
-  header .brand-logo {
-    width: 140px;
-  }
-  nav {
-    gap: 0.2rem;
-  }
-  nav button {
-    padding: 0.55rem 0.6rem;
-  }
   .grid {
     grid-template-columns: 1fr;
   }
@@ -385,19 +412,6 @@ footer {
     margin: 25px auto;
   }
 }
-.language-control {
-  grid-area: language;
-  justify-self: end;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.89rem;
-}
-.language-control select {
-  margin: 0;
-  padding: 8px;
-  max-width: 120px;
-}
 #answer {
   display: flex;
   flex-wrap: wrap;
@@ -414,7 +428,7 @@ button:disabled {
 
 .brand-logo {
   display: block;
-  width: 176px;
+  width: clamp(6rem, 20vw, 11rem);
   max-width: 100%;
   height: auto;
   background: transparent;
